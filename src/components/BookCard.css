@@ -1,3 +1,9 @@
+:root {
+  --black: #1a1a1a;
+  --gray: #a1a1a1;
+  --white: #F5F5F5;
+}
+
 .book-card {
   width: 180px;
   height: 400px;
@@ -7,10 +13,25 @@
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
-  background-color: rgb(233, 233, 233);
+  background-color: var(--white);
   border-radius: 4px;
   position: relative;
-  }
+}
+
+.on-loan-banner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background-color: red;
+  color: var(--white);
+  padding: 8px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.9rem;
+  z-index: 10;
+  border-radius: 4px 4px 0 0;
+}
 
 
 .book-image {
@@ -36,7 +57,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #999;
+  color: var(--gray);
   font-size: 1.2rem;
   font-weight: bold;
   cursor: pointer;
@@ -59,8 +80,8 @@
 }
 
 .learn-more {
-  background-color: #272727;
-  color: white;
+  background-color: var(--black);
+  color: var(--gray);
   text-decoration: none;
   padding: 6px 10px;
   width: 100%;
@@ -69,26 +90,6 @@
   cursor: pointer;
 }
 
-.remove-btn {
-  position: absolute;
-  top: 0;
-  right: 0;
-  background-color: #3f3f3f;
-  color: white;
-  font-size: 1rem;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
-  border-radius: 4px;
-  margin: 4px;
-  padding: 4px 8px;
-}
-
 .book-card.selected{
-  outline: 2px solid tomato;
-}
-
-.remove-btn.under-placeholder{
-  margin-top: 8px;
-  display: inline-block;
+  outline: 2px solid orange;
 }

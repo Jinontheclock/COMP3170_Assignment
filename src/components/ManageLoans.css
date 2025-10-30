@@ -1,0 +1,160 @@
+:root {
+  --black: #1a1a1a;
+  --gray: #a1a1a1;
+  --white: #F5F5F5;
+}
+
+.manage-loans {
+  padding: 30px;
+  color: var(--white);
+}
+
+.manage-loans-header {
+  margin-bottom: 30px;
+}
+
+.manage-loans-header h2 {
+  margin: 0 0 10px 0;
+  font-size: 2rem;
+}
+
+.loans-count {
+  margin: 0;
+  font-size: 1.1rem;
+  color: var(--gray);
+}
+
+.loan-form-section {
+  background-color: var(--black);
+  padding: 30px;
+  border-radius: 8px;
+  margin-bottom: 40px;
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.loan-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  width: 100%;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: var(--white);
+}
+
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 4px;
+  border: 1px solid var(--gray);
+  font-size: 1rem;
+  background-color: var(--white);
+  box-sizing: border-box;
+}
+
+.submit-button {
+  background-color: var(--white);
+  color: var(--black);
+  padding: 15px 0;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+  background-color: var(--gray);
+}
+
+.no-available-message {
+  text-align: center;
+  padding: 60px 20px;
+  color: #999;
+  font-size: 1.2rem;
+  background-color: var(--black);
+  border-radius: 8px;
+  margin-bottom: 40px;
+}
+
+.currently-on-loan-section {
+  margin-top: 40px;
+}
+
+.currently-on-loan-title {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  color: var(--white);
+}
+
+.loans-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.loan-list-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  background-color: var(--black);
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.loan-image-container {
+  width: 80px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--black);
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.loan-book-image {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.loan-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.loan-borrower {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--gray);
+}
+
+.loan-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--white);
+}
+
+.loan-due-date {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--gray);
+}
+

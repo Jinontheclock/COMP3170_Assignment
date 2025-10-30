@@ -1,40 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import BookCard from "./components/BookCard";
 import Modal from "./components/Modal";
+import ManageLoans from "./components/ManageLoans";
 import booksData from "../data/books.json";
 import "./App.css";
 
 function App() {
-    const [books, setBooks] = useState(
+  const [books, setBooks] = useState(
     (booksData || []).map(b => ({ ...b, selected: false }))
   );
 
   const [selectedPublisher, setSelectedPublisher] = useState("All");
   const [selectedLanguage, setSelectedLanguage] = useState("All");
+  const [borrowedBooks, setBorrowedBooks] = useState([]);
+  const [showManageLoans, setShowManageLoans] = useState(false);
 
- const handleSelect = (clickedId) => {
-   setBooks(prev => {
-     const clicked = prev.find(b => b.isbn13 === clickedId);
-     const willSelect = !(clicked?.selected);
-     return prev.map(b =>
-       b.isbn13 === clickedId ? { ...b, selected: willSelect } : { ...b, selected: false }
-     );
-   });
- };
+  const handleSelect = (clickedId) => {
+    setBooks(prev => {
+      const clicked = prev.find(b => b.isbn13 === clickedId);
+      const willSelect = !(clicked?.selected);
+      return prev.map(b =>
+        b.isbn13 === clickedId ? { ...b, selected: willSelect } : { ...b, selected: false }
+      );
+    });
+  };
 
- const handleDelete = () => {
-   setBooks(prev => prev.filter(b => !b.selected));
- };
- const hasSelected = books.some(b => b.selected);
+  const handleDelete = () => {
+    setBooks(prev => prev.filter(b => !b.selected));
+  };
+  const hasSelected = books.some(b => b.selected);
 
-  const publishers = ["All", ...new Set(books.map(b => b.publisher).filter(Boolean))];
-  const languages = ["All", ...new Set(books.map(b => b.language).filter(Boolean))];
+  const publishers = useMemo(() => ["All", ...new Set(books.map(b => b.publisher).filter(Boolean))], [books]);
+  const languages = useMemo(() => ["All", ...new Set(books.map(b => b.language).filter(Boolean))], [books]);
 
-  const filteredBooks = books.filter(book => {
-    const matchPublisher = selectedPublisher === "All" || book.publisher === selectedPublisher;
-    const matchLanguage = selectedLanguage === "All" || book.language === selectedLanguage;
-    return matchPublisher && matchLanguage;
-  });
+  const filteredBooks = useMemo(() => {
+    return books.filter(book => {
+      const matchPublisher = selectedPublisher === "All" || book.publisher === selectedPublisher;
+      const matchLanguage = selectedLanguage === "All" || book.language === selectedLanguage;
+      return matchPublisher && matchLanguage;
+    });
+  }, [books, selectedPublisher, selectedLanguage]);
+
+  const isBorrowedSet = useMemo(() => new Set(borrowedBooks.map(b => b.isbn13)), [borrowedBooks]);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
@@ -84,42 +91,43 @@ function App() {
     }
   };
 
+  const trimValue = (value) => (value || "").trim();
+  const numericValue = (value) => value ? Number(value) : "";
+
   const handleSubmit = (e) => {
     e.preventDefault();
     
+    const bookData = {
+      title: trimValue(newBook.title),
+      author: trimValue(newBook.author),
+      publisher: trimValue(newBook.publisher),
+      year: numericValue(newBook.year),
+      language: trimValue(newBook.language),
+      pages: numericValue(newBook.pages),
+      image: trimValue(newBook.image),
+      selected: false,
+    };
+    
     if (isEditMode) {
-      const updatedBook = {
-        isbn13: newBook.isbn13,
-        title: newBook.title.trim(),
-        author: (newBook.author || "").trim(),
-        publisher: (newBook.publisher || "").trim(),
-        year: newBook.year ? Number(newBook.year) : "",
-        language: (newBook.language || "").trim(),
-        pages: newBook.pages ? Number(newBook.pages) : "",
-        image: (newBook.image || "").trim(),
-        selected: false,
-      };
-      
+      const updatedBook = { ...bookData, isbn13: newBook.isbn13 };
       setBooks((prev) => prev.map(b => 
         b.isbn13 === updatedBook.isbn13 ? updatedBook : b
       ));
     } else {
-      const bookToAdd = {
-      isbn13: `user-${Date.now()}`,
-      title: newBook.title.trim(),
-      author: (newBook.author || "").trim(),
-      publisher: (newBook.publisher || "").trim(),
-      year: newBook.year ? Number(newBook.year) : "",
-      language: (newBook.language || "").trim(),
-      pages: newBook.pages ? Number(newBook.pages) : "",
-      image: (newBook.image || "").trim(),
-      selected: false,
-    };
-
-    setBooks((prev) => [bookToAdd, ...prev]);
+      const bookToAdd = { ...bookData, isbn13: `user-${Date.now()}` };
+      setBooks((prev) => [bookToAdd, ...prev]);
     }
     
     closeModal();
+  };
+
+  const handleBorrowBook = (isbn13, borrower, period) => {
+    if (isBorrowedSet.has(isbn13)) return;
+    const book = books.find(b => b.isbn13 === isbn13);
+    if (book) {
+      const loanDate = new Date().toISOString();
+      setBorrowedBooks(prev => [...prev, { ...book, borrower, period, loanDate }]);
+    }
   };
 
   return (
@@ -128,86 +136,105 @@ function App() {
         <h1>Book Catalog</h1>
       </header>
 
-      <div className="filters">
-        <div className="filter-group">
-          <label className="filter-label">
-            Publisher
-          </label>
-          <select 
-            className="filter-select"
-            value={selectedPublisher} 
-            onChange={(e) => setSelectedPublisher(e.target.value)}
-          >
-            {publishers.map(pub => (
-              <option key={pub} value={pub}>{pub}</option>
-            ))}
-          </select>
-        </div>
+      <div className="top-controls">
+        <button 
+          className="manage-loans-button"
+          onClick={() => setShowManageLoans(!showManageLoans)}
+        >
+          {showManageLoans ? 'Quit' : 'Manage Loans'}
+        </button>
 
-        <div className="filter-group">
-          <label className="filter-label">
-            Language
-          </label>
-          <select 
-            className="filter-select"
-            value={selectedLanguage} 
-            onChange={(e) => setSelectedLanguage(e.target.value)}
-          >
-            {languages.map(lang => (
-              <option key={lang} value={lang}>{lang}</option>
-            ))}
-          </select>
-        </div>
+        {!showManageLoans && (
+          <div className="filters">
+            <div className="filter-group">
+              <label className="filter-label">
+                Publisher
+              </label>
+              <select 
+                className="filter-select"
+                value={selectedPublisher} 
+                onChange={(e) => setSelectedPublisher(e.target.value)}
+              >
+                {publishers.map(pub => (
+                  <option key={pub} value={pub}>{pub}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label className="filter-label">
+                Language
+              </label>
+              <select 
+                className="filter-select"
+                value={selectedLanguage} 
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+              >
+                {languages.map(lang => (
+                  <option key={lang} value={lang}>{lang}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </div>
 
       <main>
-        <div className="main">
+        {showManageLoans ? (
+          <ManageLoans 
+            books={books}
+            borrowedBooks={borrowedBooks}
+            onBorrow={handleBorrowBook}
+          />
+        ) : (
+          <div className="main">
 
-          <div className="new" onClick={openModal}>
-            <BookCard />
-            <div className="button-container">
-            <button
-                className="action-button"
-              disabled={!hasSelected}
-              onClick={(e) => {
-                e.stopPropagation(); 
-                if (hasSelected) handleDelete();
-              }}
-            >
-              Delete
-            </button>
-              <button
-                className="action-button"
-                disabled={!hasSelected}
-                onClick={(e) => {
-                  e.stopPropagation(); 
-                  if (hasSelected) handleEdit();
-                }}
-              >
-                Edit
-              </button>
+            <div className="new" onClick={openModal}>
+              <BookCard />
+              <div className="button-container">
+                <button
+                  className="action-button"
+                  disabled={!hasSelected}
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    handleDelete();
+                  }}
+                >
+                  Delete
+                </button>
+                <button
+                  className="action-button"
+                  disabled={!hasSelected}
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    handleEdit();
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
+
             </div>
 
+            <div className="content">
+              {filteredBooks.map((book) => (
+                <BookCard
+                  key={book.isbn13}
+                  isbn13={book.isbn13}
+                  title={book.title}
+                  subtitle={book.subtitle}
+                  price={book.price}
+                  image={book.image}
+                  url={book.url}
+                  selected={book.selected}
+                  onSelect={handleSelect}
+                  isBorrowed={isBorrowedSet.has(book.isbn13)}
+                />
+              ))}
+            </div>
+            
           </div>
-
-          <div className="content">
-            {filteredBooks.map((book) => (
-              <BookCard
-                key={book.isbn13}
-                isbn13={book.isbn13}
-                title={book.title}
-                subtitle={book.subtitle}
-                price={book.price}
-                image={book.image}
-                url={book.url}
-                selected={book.selected}
-                onSelect={handleSelect}
-              />
-            ))}
-          </div>
-          
-        </div>
-
+        )}
       </main>
 
       <footer className="footer">&#169; Hajin Lee, 2025</footer>

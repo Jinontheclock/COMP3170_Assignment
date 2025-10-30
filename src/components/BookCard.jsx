@@ -1,7 +1,7 @@
 import React from "react";
 import "./BookCard.css";
 
-function BookCard({ isbn13, title, subtitle, price, image, url, selected, onSelect }) {
+function BookCard({ isbn13, title, subtitle, price, image, url, selected, onSelect, isBorrowed }) {
   return (
       <div
       className={`book-card${selected ? " selected" : ""}`}
@@ -12,6 +12,10 @@ function BookCard({ isbn13, title, subtitle, price, image, url, selected, onSele
         if ((e.key === "Enter" || e.key === " ") && onSelect) onSelect(isbn13);
       }}
     >
+
+      {isBorrowed && (
+        <div className="on-loan-banner">On loan</div>
+      )}
 
       {image ? (
         <img src={image} alt={title} className="book-image" />
