@@ -4,7 +4,6 @@ import BookCard from "./components/BookCard";
 import BookForm from "./components/BookForm";
 import ManageLoans from "./components/ManageLoans";
 import BookDetailPage from "./pages/BookDetailPage";
-import HomePage from "./pages/HomePage";
 import booksData from "../data/books.json";
 import "./App.css";
 
@@ -142,40 +141,116 @@ function App() {
 
         <Routes>
           <Route path="/book/:isbn13" element={<BookDetailPage books={books} />} />
-          <Route 
-            path="/" 
-            element={
-              <HomePage
-                showManageLoans={showManageLoans}
-                setShowManageLoans={setShowManageLoans}
-                selectedPublisher={selectedPublisher}
-                setSelectedPublisher={setSelectedPublisher}
-                selectedLanguage={selectedLanguage}
-                setSelectedLanguage={setSelectedLanguage}
-                publishers={publishers}
-                languages={languages}
-                books={books}
-                borrowedBooks={borrowedBooks}
-                handleBorrowBook={handleBorrowBook}
-                openModal={openModal}
-                hasSelected={hasSelected}
-                handleDelete={handleDelete}
-                handleEdit={handleEdit}
-                filteredBooks={filteredBooks}
-                handleSelect={handleSelect}
-                isBorrowedSet={isBorrowedSet}
-                isModalOpen={isModalOpen}
-                newBook={newBook}
-                handleChange={handleChange}
-                handleSubmit={handleSubmit}
-                closeModal={closeModal}
-                isEditMode={isEditMode}
-              />
-            }
-          />
-        </Routes>
+          <Route path="/" element={
+            <>
+              <div className="top-controls">
+        <button 
+          className="manage-loans-button"
+          onClick={() => setShowManageLoans(!showManageLoans)}
+        >
+          {showManageLoans ? 'Quit' : 'Manage Loans'}
+        </button>
+
+        {!showManageLoans && (
+          <div className="filters">
+            <div className="filter-group">
+              <label className="filter-label">
+                Publisher
+              </label>
+              <select 
+                className="filter-select"
+                value={selectedPublisher} 
+                onChange={(e) => setSelectedPublisher(e.target.value)}
+              >
+                {publishers.map(pub => (
+                  <option key={pub} value={pub}>{pub}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="filter-group">
+              <label className="filter-label">
+                Language
+              </label>
+              <select 
+                className="filter-select"
+                value={selectedLanguage} 
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+              >
+                {languages.map(lang => (
+                  <option key={lang} value={lang}>{lang}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
       </div>
-    </Router>
+
+      <main>
+        {showManageLoans ? (
+          <ManageLoans 
+            books={books}
+            borrowedBooks={borrowedBooks}
+            onBorrow={handleBorrowBook}
+          />
+        ) : (
+          <div className="main">
+
+            <div className="new" onClick={openModal}>
+              <BookCard />
+              <div className="button-container">
+                <button
+                  className="action-button"
+                  disabled={!hasSelected}
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    handleDelete();
+                  }}
+                >
+                  Delete
+                </button>
+                <button
+                  className="action-button"
+                  disabled={!hasSelected}
+                  onClick={(e) => {
+                    e.stopPropagation(); 
+                    handleEdit();
+                  }}
+                >
+                  Edit
+                </button>
+              </div>
+
+            </div>
+
+            <div className="content">
+              {filteredBooks.map((book) => (
+                <BookCard {...book}
+                  key={book.isbn13}
+                  selected={book.selected}
+                  onSelect={handleSelect}
+                  isBorrowed={isBorrowedSet.has(book.isbn13)}
+                  bookData={book}
+                />
+              ))}
+            </div>
+            
+          </div>
+        )}
+      </main>
+
+      <footer className="footer">&#169; Hajin Lee, 2025</footer>
+
+      {isModalOpen && (
+        <BookForm
+          newBook={newBook}
+          onChange={handleChange}
+          onSubmit={handleSubmit}
+          onClose={closeModal}
+          isEditMode={isEditMode}
+        />
+      )}
+    </div>
   );
 }
 

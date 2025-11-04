@@ -1,7 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import "./BookCard.css";
 
-function BookCard({ isbn13, title, subtitle, price, image, url, selected, onSelect, isBorrowed }) {
+function BookCard(props) {
+  const { isbn13, title, subtitle, price, image, url, selected, onSelect, isBorrowed } = props;
+  const navigate = useNavigate();
   return (
       <div
       className={`book-card${selected ? " selected" : ""}`}
@@ -29,21 +32,19 @@ function BookCard({ isbn13, title, subtitle, price, image, url, selected, onSele
         {price && <p className="book-price">{price}</p>}
       </div>
 
-      {url && (
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
+      <div className="book-actions">
+        <button
           className="learn-more"
-          onClick={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/book/${isbn13}`);
+          }}
         >
-          Learn More
-        </a>
-      )}
-
+          Details
+        </button>
+      </div>
     </div>
   );
-
 }
 
 export default BookCard;
